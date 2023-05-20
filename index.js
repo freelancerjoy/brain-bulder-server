@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Brain Buiders server is Running");
+  res.send("Brain Buiders server j is Running");
 });
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dkc5olm.mongodb.net/?retryWrites=true&w=majority`;
@@ -36,6 +36,10 @@ async function run() {
       const result = await allToyCollection.find().limit(20).toArray();
       res.send(result);
     });
+    app.get("/alltoys", async (req, res) => {
+      const result = await allToyCollection.find().toArray();
+      res.send(result);
+    });
 
     app.get("/toy/:id", async (req, res) => {
       const id = req.params.id;
@@ -43,6 +47,14 @@ async function run() {
       const result = await allToyCollection.findOne(query);
       res.send(result);
     });
+
+    app.get("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allToyCollection.findOne(query);
+      res.send(result);
+    });
+
     app.get("/mytoy", async (req, res) => {
       console.log(req.query.email);
       let quary = {};
@@ -60,6 +72,27 @@ async function run() {
       const toy = req.body;
       console.log(toy);
       const result = await allToyCollection.insertOne(toy);
+      res.send(result);
+    });
+
+    app.put("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const toy = req.body;
+      const options = { upsert: true };
+      const updateToy = {
+        $set: {
+          price: toy.price,
+          quantity: toy.quantity,
+          description: toy.description,
+        },
+      };
+
+      const result = await allToyCollection.updateOne(
+        query,
+        updateToy,
+        options
+      );
       res.send(result);
     });
 
